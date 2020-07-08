@@ -104,16 +104,16 @@ class HazardousAsteroidsRepository extends ServiceEntityRepository
     public function getBestMonth(bool $hazardous = false)
     {
         $queryBuilder = $this->createQueryBuilder('h');
-        $queryBuilder->select(' MONTH(h.date),count(h.date) as  count_record');
+        $queryBuilder->select(' MONTH(h.date) as m,YEAR(h.date) as y, count(h.date) as HIDDEN  count_record');
         $queryBuilder
             ->where('h.isPotentiallyHazardousAsteroid = :isPotentiallyHazardousAsteroid')
             ->setParameter('isPotentiallyHazardousAsteroid', $hazardous);
-//        $queryBuilder->orderBy('count_record','DESC');
-        $queryBuilder->groupBy(' MONTH(h.date) ');
+        $queryBuilder->orderBy('count_record','DESC');
+        $queryBuilder->groupBy('m,y');
 
         $queryBuilder->setMaxResults(1);
 
-        return $queryBuilder->getQuery()->getResult();
+        return $queryBuilder->getQuery()->getOneOrNullResult();
     }
 
 }
