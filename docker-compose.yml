@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  dbmysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: my_secret_pw_shh
+      MYSQL_DATABASE: clicklogiq
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+    ports:
+      - "3310:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    depends_on:
+      - dbmysql
+    volumes:
+      - ./:/var/www/html/
+      - ./virtualhosts.conf:/etc/apache2/sites-enabled/000-default.conf
+    ports:
+      - "8110:80"
+    stdin_open: true
+    tty: true
+volumes:
+  dbdata:
+    driver: local
