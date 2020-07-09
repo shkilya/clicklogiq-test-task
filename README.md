@@ -9,3 +9,8 @@ docker-compose up -d
 ```
 ./bin/console do:mi:mi 
 ```
+
+### Retrieve hazardous asteroids from api
+```
+./bin/console app:retrieve-hazardous-asteroids   
+```
