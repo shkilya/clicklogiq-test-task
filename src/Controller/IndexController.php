@@ -24,10 +24,8 @@ class IndexController extends AbstractController
 
     private const DEFAULT_LIMIT = 20;
 
-    /**
-     * @var HazardousAsteroidsRepository
-     */
-    private $hazardousAsteroidsRepository;
+
+    private HazardousAsteroidsRepository $hazardousAsteroidsRepository;
 
     /**
      * IndexController constructor.
@@ -46,7 +44,11 @@ class IndexController extends AbstractController
      */
     public function index()
     {
-
+        return $this->render('index/index.html.twig',
+            [
+                'variable'=>'ddd'
+            ]
+        );
     }
 
     /**

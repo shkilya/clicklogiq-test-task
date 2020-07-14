@@ -1,30 +1,57 @@
 version: '3'
 
 services:
-  dbmysql:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: my_secret_pw_shh
-      MYSQL_DATABASE: clicklogiq
-      MYSQL_USER: root
-      MYSQL_PASSWORD: password
-    ports:
-      - "3310:3306"
-    volumes:
-      - dbdata:/var/lib/mysql
-  web:
+  php-fpm:
     build:
       context: .
-      dockerfile: ./docker/php/Dockerfile
-    depends_on:
-      - dbmysql
+      dockerfile: docker/php-fpm/Dockerfile
+      args:
+        environment: dev
     volumes:
-      - ./:/var/www/html/
-      - ./virtualhosts.conf:/etc/apache2/sites-enabled/000-default.conf
+      - ./:/usr/src/app
+      - "~/.composer.sh:/root/.composer.sh"
+      - "~/.ssh:/root/.ssh-local:ro"
+    networks:
+      - clicklogiq_backend
+    depends_on:
+      - postgres
+    environment:
+      - LOCAL_ENV=1
+      - COMPOSER_ALLOW_SUPERUSER=1
+      - DATABASE_HOST=mysql
+      - DATABASE_NAME=project
+      - DATABASE_USER=developer
+      - DATABASE_PASSWORD=password
+      - PHP_IDE_CONFIG=serverName=docker
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+      args:
+        environment: dev
+    volumes:
+      - ./:/usr/src/app
     ports:
-      - "8110:80"
-    stdin_open: true
-    tty: true
-volumes:
-  dbdata:
-    driver: local
+      - "8810:80"
+    networks:
+      - clicklogiq_backend
+    depends_on:
+      - php-fpm
+
+  postgres:
+    image: postgres:11
+    volumes:
+      - ./docker/postgres/:/docker-entrypoint-initdb.d/
+    ports:
+      - "5810:5432"
+    networks:
+      - clicklogiq_backend
+    environment:
+      - POSTGRES_DB=project
+      - POSTGRES_USER=developer
+      - POSTGRES_PASSWORD=password
+
+networks:
+  clicklogiq_backend:
+    external: true
